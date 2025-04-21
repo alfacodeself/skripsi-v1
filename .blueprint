@@ -1,0 +1,58 @@
+created:
+    - database/factories/AdminFactory.php
+    - database/factories/KategoriFactory.php
+    - database/factories/PaketFactory.php
+    - database/factories/JenisBiayaFactory.php
+    - database/factories/BiayaPaketFactory.php
+    - database/factories/JenisDokumenFactory.php
+    - database/factories/PelangganFactory.php
+    - database/factories/DokumenPelangganFactory.php
+    - database/factories/LanggananFactory.php
+    - database/factories/ProgressFactory.php
+    - database/factories/ProgressLanggananFactory.php
+    - database/factories/TagihanFactory.php
+    - database/factories/DetailTagihanFactory.php
+    - database/factories/TransaksiTagihanFactory.php
+    - database/migrations/2024_12_17_051642_create_admins_table.php
+    - database/migrations/2024_12_17_051643_create_kategoris_table.php
+    - database/migrations/2024_12_17_051644_create_pakets_table.php
+    - database/migrations/2024_12_17_051645_create_jenis_biayas_table.php
+    - database/migrations/2024_12_17_051646_create_biaya_pakets_table.php
+    - database/migrations/2024_12_17_051647_create_jenis_dokumens_table.php
+    - database/migrations/2024_12_17_051648_create_pelanggans_table.php
+    - database/migrations/2024_12_17_051649_create_dokumen_pelanggans_table.php
+    - database/migrations/2024_12_17_051650_create_langganans_table.php
+    - database/migrations/2024_12_17_051651_create_progress_table.php
+    - database/migrations/2024_12_17_051652_create_progress_langganans_table.php
+    - database/migrations/2024_12_17_051653_create_tagihans_table.php
+    - database/migrations/2024_12_17_051654_create_detail_tagihans_table.php
+    - database/migrations/2024_12_17_051655_create_transaksi_tagihans_table.php
+    - app/Models/Admin.php
+    - app/Models/Kategori.php
+    - app/Models/Paket.php
+    - app/Models/JenisBiaya.php
+    - app/Models/BiayaPaket.php
+    - app/Models/JenisDokumen.php
+    - app/Models/Pelanggan.php
+    - app/Models/DokumenPelanggan.php
+    - app/Models/Langganan.php
+    - app/Models/Progress.php
+    - app/Models/ProgressLangganan.php
+    - app/Models/Tagihan.php
+    - app/Models/DetailTagihan.php
+    - app/Models/TransaksiTagihan.php
+models:
+    Admin: { foto: 'string nullable', nama: 'string required', email: 'string:150 unique', password: string, superadmin: 'bool default:false', status: 'enum:aktif,"tidak aktif",peringatan,diblokir default:''aktif''', catatan: 'text nullable', tanggal_verifikasi_email: 'date null', remember_token: 'string nullable' }
+    Kategori: { nama: string, slug: 'string unique', deskripsi: 'text nullable', warna: 'string:100 nullable', jumlah_hari: integer, status: 'enum:aktif,"tidak aktif"', relationships: { hasMany: Paket } }
+    Paket: { id_kategori: 'foreign:kategori', nama: string, slug: 'string unique', deskripsi: 'text nullable', harga: integer, layanan: json, bisa_diangsur: bool, maksimal_angsuran: 'integer nullable', minimal_jumlah_angsuran: 'integer nullable', durasi_hari_angsuran: 'integer nullable', status: 'enum:aktif,"tidak aktif"', relationships: { hasMany: 'BiayaPaket, Langganan' } }
+    JenisBiaya: { nama: string, jenis_biaya: 'enum:persentase,flat', berulang: 'bool default:true', status: 'enum:aktif,"tidak aktif"', relationships: { hasMany: BiayaPaket } }
+    BiayaPaket: { id_paket: 'foreign:paket', id_jenis_biaya: 'foreign:jenis_biaya', besar_biaya: integer, status: 'enum:aktif,"tidak aktif"', keterangan: text, relationships: { hasMany: DetailTagihan } }
+    JenisDokumen: { nama_dokumen: 'string:150', status: 'enum:aktif,"tidak aktif"', relationships: { hasMany: DokumenPelanggan } }
+    Pelanggan: { foto: 'string nullable', nama: string, kode: 'string:20 unique', email: 'string:150 unique', telepon: 'string:25 unique', password: string, status: 'enum:aktif,"tidak aktif",peringatan,diblokir,diperiksa default:''aktif''', catatan: 'text nullable', tanggal_verifikasi_email: 'date null', tanggal_verifikasi_telepon: 'date null', remember_token: 'string nullable', relationships: { hasMany: 'DokumenPelanggan, Langganan' } }
+    DokumenPelanggan: { id_dokumen: 'foreign:jenis_dokumen', id_pelanggan: 'foreign:pelanggan', path: string, status: 'enum:diperiksa,disetujui,ditolak', akses_pelanggan: 'bool default:false', catatan: 'text nullable' }
+    Langganan: { id_paket: 'foreign:paket', id_pelanggan: 'foreign:pelanggan', kode_layanan: 'string:25 unique', latitude: 'double nullable', longitude: 'double nullable', alamat_lengkap: 'text nullable', status: 'enum:diperiksa,disetujui,ditolak,aktif,"tidak aktif",', catatan: 'text nullable', tanggal_pemasangan: 'date nullable', tanggal_aktif: 'date nullable', tanggal_kadaluarsa: 'date nullable', relationships: { hasMany: 'ProgressLangganan, Tagihan' } }
+    Progress: { nama: string, urutan: 'integer unique', status: 'enum:aktif,"tidak aktif"', relationships: { hasMany: ProgressLangganan } }
+    ProgressLangganan: { id_progress: 'foreign:progress', id_langganan: 'foreign:langganan', status: 'enum:diproses,selesai,gagal,menunggu', bukti: 'string nullable', keterangan: 'text nullable', tanggal_perencanaan: date }
+    Tagihan: { id_langganan: 'foreign:langganan', total_tagihan: integer, sisa_tagihan: integer, jatuh_tempo: date, status_angsuran: bool, jumlah_angsuran: 'integer nullable', status: 'enum:lunas,"belum lunas","dalam angsuran"', relationships: { hasMany: 'DetailTagihan, TransaksiTagihan' } }
+    DetailTagihan: { id_tagihan: 'foreign:tagihan', id_biaya_paket: 'foreign:biaya_paket', jumlah_biaya: integer, keterangan: 'text nullable' }
+    TransaksiTagihan: { id_tagihan: 'foreign:tagihan', kode: 'string:25 unique', jumlah_bayar: integer, jenis_pembayaran: text, keterangan: 'text nullable' }

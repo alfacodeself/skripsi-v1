@@ -1,0 +1,130 @@
+models:
+  Admin:
+    foto: string nullable
+    nama: string required
+    email: string:150 unique
+    password: string
+    superadmin: bool default:false
+    status: enum:aktif,"tidak aktif",peringatan,diblokir default:'aktif'
+    catatan: text nullable
+    tanggal_verifikasi_email: date null
+    remember_token: string nullable
+  Kategori:
+    nama: string
+    slug: string unique
+    deskripsi: text nullable
+    warna: string:100 nullable
+    jumlah_hari: integer
+    status: enum:aktif,"tidak aktif"
+    relationships:
+      hasMany: Paket
+  Paket:
+    id_kategori: foreign:kategori
+    nama: string
+    slug: string unique
+    deskripsi: text nullable
+    harga: integer
+    layanan: json
+    bisa_diangsur: bool
+    maksimal_angsuran: integer nullable
+    minimal_jumlah_angsuran: integer nullable
+    durasi_hari_angsuran: integer nullable
+    status: enum:aktif,"tidak aktif"
+    relationships:
+      hasMany: BiayaPaket, Langganan
+  JenisBiaya:
+    nama: string
+    jenis_biaya: enum:persentase,flat
+    berulang: bool default:true
+    status: enum:aktif,"tidak aktif"
+    relationships:
+      hasMany: BiayaPaket
+  BiayaPaket:
+    id_paket: foreign:paket
+    id_jenis_biaya: foreign:jenis_biaya
+    besar_biaya: integer
+    status: enum:aktif,"tidak aktif"
+    keterangan: text
+    relationships:
+      hasMany: DetailTagihan
+  JenisDokumen:
+    nama_dokumen: string:150
+    status: enum:aktif,"tidak aktif"
+    relationships:
+      hasMany: DokumenPelanggan
+  Pelanggan:
+    foto: string nullable
+    nama: string
+    kode: string:20 unique
+    email: string:150 unique
+    telepon: string:25 unique
+    password: string
+    status: enum:aktif,"tidak aktif",peringatan,diblokir,diperiksa default:'aktif'
+    catatan: text nullable
+    tanggal_verifikasi_email: date null
+    tanggal_verifikasi_telepon: date null
+    remember_token: string nullable
+    relationships:
+      hasMany: DokumenPelanggan, Langganan
+  DokumenPelanggan:
+    id_dokumen: foreign:jenis_dokumen
+    id_pelanggan: foreign:pelanggan
+    path: string
+    status: enum:diperiksa,disetujui,ditolak
+    akses_pelanggan: bool default:false
+    catatan: text nullable
+  Langganan:
+    id_paket: foreign:paket
+    id_pelanggan: foreign:pelanggan
+    kode_layanan: string:25 unique
+    latitude: double nullable
+    longitude: double nullable
+    alamat_lengkap: text nullable
+    status: enum:diperiksa,disetujui,ditolak,aktif,"tidak aktif",
+    catatan: text nullable
+    tanggal_pemasangan: date nullable
+    tanggal_aktif: date nullable
+    tanggal_kadaluarsa: date nullable
+    relationships:
+      hasMany: ProgressLangganan, Tagihan
+  Progress:
+    nama: string
+    urutan: integer unique
+    status: enum:aktif,"tidak aktif"
+    relationships:
+      hasMany: ProgressLangganan
+  ProgressLangganan:
+    id_progress: foreign:progress
+    id_langganan: foreign:langganan
+    status: enum:diproses,selesai,gagal,menunggu
+    bukti: string nullable
+    keterangan: text nullable
+    tanggal_perencanaan: date nullable
+  Tagihan:
+    id_langganan: foreign:langganan
+    total_tagihan: integer
+    sisa_tagihan: integer
+    jatuh_tempo: date
+    status_angsuran: bool
+    jumlah_angsuran: integer nullable
+    status: enum:lunas,"belum lunas","dalam angsuran"
+    relationships:
+      hasMany: DetailTagihan, TransaksiTagihan
+  DetailTagihan:
+    id_tagihan: foreign:tagihan
+    id_biaya_paket: foreign:biaya_paket
+    jumlah_biaya: integer
+    keterangan: text nullable
+  TransaksiTagihan:
+    id_tagihan: foreign:tagihan
+    kode: string:25 unique
+    jumlah_bayar: integer
+    metode_pembayaran: enum:midtrans,direct
+    bukti_pembayaran: string nullable
+    midtrans_order_id: string nullable
+    midtrans_response: json nullable
+    snap_token: text nullable
+    keterangan: text nullable
+    tanggal_lunas: dateTime nullable
+    tanggal_kadaluarsa: dateTime nullable
+    status: enum:menunggu,diperiksa,dibatalkan,kadaluarsa,lunas,gagal
