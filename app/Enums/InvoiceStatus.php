@@ -14,7 +14,7 @@ enum InvoiceStatus: string implements HasLabel, HasColor, HasIcon
   {
     // return $this->name;
     return match ($this) {
-      self::LUNAS => 'lunas',
+      self::LUNAS => 'Lunas',
       self::BELUM_LUNAS => 'Tidak Lunas',
       self::DALAM_ANGSURAN => 'Dalam Angsuran',
     };

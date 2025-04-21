@@ -154,6 +154,8 @@ class InvoiceList extends Component implements HasTable, HasForms
                     ->label('Buat Tagihan Baru')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->color(Color::Emerald)
+                    ->modal()
+                    ->modalWidth(MaxWidth::Small)
                     ->form(function () {
                         return [
                             Placeholder::make('biaya_paket')
@@ -163,15 +165,19 @@ class InvoiceList extends Component implements HasTable, HasForms
                                     $biayaPaket = $langganan->paket->biayaPaket;
                                     $totalBiaya = 0;
 
-                                    $table = '<div class="w-full overflow-x-auto">
-                                    <table class="w-full rounded-lg overflow-hidden">
-                                        <thead class="bg-gray-500">
+                                    $table = '<div class="w-full overflow-x-auto rounded">
+                                    <table class="w-full bg-white border border-gray-200 shadow-sm rounded-lg">
+                                        <thead class="bg-gray-100">
                                             <tr>
-                                                <th class="px-4 py-2 text-left font-medium uppercase tracking-wider">Jenis Biaya</th>
-                                                <th class="px-4 py-2 text-right font-medium uppercase tracking-wider">Harga</th>
+                                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-b">
+                                                    Jenis Biaya
+                                                </th>
+                                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider border-b">
+                                                    Harga
+                                                </th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-gray-200">';
+                                        <tbody class="divide-y divide-gray-100 text-sm text-gray-700">';
 
                                     foreach ($biayaPaket as $biaya) {
                                         $jumlahBiaya = $biaya->jenisBiaya->jenis_biaya === 'flat'
@@ -180,16 +186,16 @@ class InvoiceList extends Component implements HasTable, HasForms
 
                                         $totalBiaya += $jumlahBiaya;
 
-                                        $table .= '<tr>
-                                        <td class="px-4 py-2 text-sm">' . $biaya->jenisBiaya->nama . '</td>
-                                        <td class="px-4 py-2 text-sm text-right">Rp ' . number_format($jumlahBiaya, 0, ',', '.') . '</td>
-                                    </tr>';
+                                        $table .= '<tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-2">' . $biaya->jenisBiaya->nama . '</td>
+                                            <td class="px-4 py-2 text-right">Rp ' . number_format($jumlahBiaya, 0, ',', '.') . '</td>
+                                        </tr>';
                                     }
 
-                                    $table .= '<tr class="bg-gray-500">
-                                    <td class="px-4 py-2 text-sm font-bold">Total Biaya</td>
-                                    <td class="px-4 py-2 text-sm text-right font-bold">Rp ' . number_format($totalBiaya, 0, ',', '.') . '</td>
-                                </tr>';
+                                    $table .= '<tr class="bg-emerald-50 font-semibold border-t border-gray-200">
+                                        <td class="px-4 py-3 text-emerald-700">Total Biaya</td>
+                                        <td class="px-4 py-3 text-right text-emerald-700">Rp ' . number_format($totalBiaya, 0, ',', '.') . '</td>
+                                    </tr>';
                                     $table .= '</tbody></table></div>';
                                     return new HtmlString($table);
                                 })

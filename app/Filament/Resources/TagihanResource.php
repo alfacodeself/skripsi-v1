@@ -9,31 +9,18 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class TagihanResource extends Resource
 {
     protected static ?string $model = Tagihan::class;
-    // protected static ?string $recordTitleAttribute = 'nama';
-    // public static function getGlobalSearchResultTitle(Model $record): string|Htmlable
-    // {
-    //     return $record->nama;
-    // }
-    // public static function getGlobalSearchResultDetails(Model $record): array
-    // {
-    //     return [
-    //         'Langganan' => $record->langganan,
-    //         'Total Tagihan' => $record->total_tagihan,
-    //         'Sisa Tagihan' => $record->sisa_tagihan,
-    //         'Jatuh Tempo' => $record->jatuh_tempo,
-    //         'Status' => Str::upper($record->status)
-    //     ];
-    // }
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Tagihan';
     protected static ?string $navigationGroup = 'Data Keuangan';
@@ -42,9 +29,6 @@ class TagihanResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('id_langganan')
-                    ->required()
-                    ->numeric(),
                 Forms\Components\TextInput::make('total_tagihan')
                     ->required()
                     ->numeric(),
@@ -67,38 +51,31 @@ class TagihanResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id_langganan')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total_tagihan')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('sisa_tagihan')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('jatuh_tempo')
-                    ->date()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('langganan.kode_layanan')
+                    ->formatStateUsing(function ($state, $record) {
+                        return view('components.table.invoice-detail', [
+                            'url' => LanggananResource::getUrl('edit', [$state]),
+                            'langgananId' => $state,
+                            'totalTagihan' => $record->total_tagihan,
+                            'sisaTagihan' => $record->sisa_tagihan,
+                            'jatuhTempo' => $record->jatuh_tempo,
+                        ]);
+                    })
+                    ->label('Tagihan'),
                 Tables\Columns\TextColumn::make('status_angsuran')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('jumlah_angsuran')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->formatStateUsing(fn ($state, $record) => view('components.table.installment-detail', [
+                        'statusAngsuran' => $state,
+                        'jumlahAngsuran' => $record->jumlah_angsuran,
+                    ])),
+                Tables\Columns\TextColumn::make('status')->badge(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make()
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

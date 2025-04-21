@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\{SubscriptionProgressStatus};
+use App\Enums\{SubscriptionProgressStatus, SubscriptionStatus};
 use App\Filament\Resources\LanggananResource\Pages;
 use App\Forms\Components\LeafletMap;
 use App\Models\{Langganan, Paket, Pelanggan};
+use Carbon\Carbon;
 use Filament\Forms\Components\{DatePicker, FileUpload, Group, Hidden, Placeholder, Repeater, RichEditor, Section, Select, Textarea, Toggle};
 use Filament\Forms\{Form, Get, Set};
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Actions\{Action, ActionGroup};
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\{Builder, Model};
@@ -304,25 +307,41 @@ class LanggananResource extends Resource
                     ->label('Tanggal Aktif')
                     ->formatStateUsing(fn($record) => '<center>' . $record->tanggal_aktif->translatedFormat('d F Y') . '<br>s/d<br>' . $record->tanggal_kadaluarsa->translatedFormat('d F Y') . '</center>')
                     ->html(),
-                TextColumn::make('created_at')
-                    ->label('Tanggal Dibuat')
-                    ->since()
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label('Terakhir Diperbarui')
-                    ->since()
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')->options(SubscriptionStatus::class)
             ])
+            ->searchable()
+            ->searchDebounce('200')
+            ->persistFiltersInSession()
             ->actions([
                 ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\EditAction::make()->label('Lihat Langganan'),
+                    Action::make('Status Langganan')
+                        ->icon('heroicon-m-adjustments-horizontal')
+                        ->modal()
+                        ->modalWidth(MaxWidth::Medium)
+                        ->form([
+                            Select::make('status')
+                                ->required()
+                                ->placeholder('Pilih Status')
+                                ->options(SubscriptionStatus::AKTIF),
+                            RichEditor::make('catatan')->placeholder('Tulis catatan anda untuk langganan jika diperlukan...')
+                        ])
+                        ->action(function (array $data, Langganan $record) {
+                            if ($data['status'] === SubscriptionStatus::AKTIF->value) {
+                                if (empty($record->tanggal_aktif) && empty($record->tanggal_kadaluarsa)) {
+                                    $data['tanggal_aktif'] = Carbon::now();
+                                    $data['tanggal_kadaluarsa'] = Carbon::now()->addDays($record->paket->kategori->jumlah_hari);
+                                }
+                            }
+                            $record->updateOrFail($data);
+                            Notification::make()
+                                ->title('Berhasil!')
+                                ->success()
+                                ->body('Berhasil mengubah status langganan.')
+                                ->send();
+                        }),
                     Action::make('kelolaProgres')
                         ->label('Histori Progress')
                         ->icon('heroicon-o-list-bullet')
