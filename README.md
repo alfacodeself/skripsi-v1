@@ -3,8 +3,8 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo">
   <br>
-  <img src="https://miro.medium.com/v2/resize:fit:1400/1*DniZ6fmYde6IJ9NCpqL3Mw.jpeg" width="200" alt="Filament Logo">
-  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9zNHtvcIpeFmgp1-vwo9blWt16IHfrmRDyg&s" width="200" alt="Midtrans Logo">
+  <img src="https://miro.medium.com/v2/resize:fit:1400/1*DniZ6fmYde6IJ9NCpqL3Mw.jpeg" width="200" height="200" alt="Filament Logo">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9zNHtvcIpeFmgp1-vwo9blWt16IHfrmRDyg&s" width="200" height="200" alt="Midtrans Logo">
 </div>
 
 ## 📋 Tentang Aplikasi
