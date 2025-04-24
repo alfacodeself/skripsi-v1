@@ -35,17 +35,29 @@ class InvoiceDetailList extends Component implements HasTable, HasForms
                 DetailTagihan::query()
                     ->where('id_tagihan', $this->tagihan->id)
             )
-            ->heading('List Detail Tagihan')
+            ->searchable(false)
+            ->heading('📋 List Detail Tagihan')
             ->columns([
                 TextColumn::make('index')
                     ->label('No.')
-                    ->rowIndex(false),
+                    ->rowIndex(isFromZero: false)
+                    ->alignCenter(),
+
                 TextColumn::make('keterangan')
-                    ->label('Jenis Pembayaran'),
+                    ->label('📝 Jenis Pembayaran')
+                    ->searchable()
+                    ->wrap()
+                    ->color('primary'),
+
                 TextColumn::make('jumlah_biaya')
-                    ->label('Harga')
+                    ->label('💰 Harga')
                     ->money('IDR')
-                    ->sortable(),
-            ]);
+                    ->sortable()
+                    ->alignRight()
+                    ->color('success'),
+            ])
+            ->paginated(false) // kalau ingin semua langsung tampil tanpa pagination
+            ->striped()
+            ->defaultSort('jumlah_biaya', 'desc');
     }
 }

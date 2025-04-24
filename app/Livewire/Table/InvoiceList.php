@@ -2,30 +2,25 @@
 
 namespace App\Livewire\Table;
 
-use App\Enums\InvoiceStatus;
-use App\Enums\PaymentMethod;
-use App\Enums\TransactionStatus;
+use App\Enums\{InvoiceStatus, PaymentMethod, TransactionStatus};
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use App\Models\{DetailTagihan, Langganan, Tagihan, TransaksiTagihan};
 use Carbon\Carbon;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\{Placeholder, Toggle};
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\{Action, ActionGroup};
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 use Livewire\Component;
-use Midtrans\Config;
-use Midtrans\Snap;
+use Midtrans\{Config, Snap};
 
 class InvoiceList extends Component implements HasTable, HasForms
 {
@@ -35,12 +30,14 @@ class InvoiceList extends Component implements HasTable, HasForms
 
     public function mount(Langganan $langganan): void
     {
-        $this->langganan = $langganan->load(['paket.biayaPaket.jenisBiaya', 'pelanggan']);
+        $this->langganan = $langganan->load(['paket.biayaPaket.jenisBiaya', 'pelanggan', 'tagihan']);
     }
 
     public function render()
     {
-        return view('livewire.table.invoice-list');
+        return view('livewire.table.invoice-list', [
+            'langganan' => $this->langganan
+        ]);
     }
 
     #[On('handleMidtrans')]
@@ -73,7 +70,7 @@ class InvoiceList extends Component implements HasTable, HasForms
         switch ($status) {
             case 'settlement':
             case 'capture':
-                $transaction->updateOrFail(['status' => TransactionStatus::PAID]);
+                $transaction->updateOrFail(['status' => TransactionStatus::PAID, 'tanggal_lunas' => Carbon::now()]);
                 $currentInvoiceAmount = (int) $tagihan->sisa_tagihan - $paidAmount;
                 if ($currentInvoiceAmount <= 0) {
                     $tagihan->updateOrFail([
@@ -104,7 +101,7 @@ class InvoiceList extends Component implements HasTable, HasForms
                 break;
             case 'cancel':
             case 'expire':
-                $transaction->updateOrFail(['status' => TransactionStatus::EXPIRED]);
+                $transaction->updateOrFail(['status' => TransactionStatus::EXPIRED, 'tanggal_kadaluarsa' => Carbon::now()]);
                 $notification->danger()->send();
                 break;
             default:
@@ -314,7 +311,22 @@ class InvoiceList extends Component implements HasTable, HasForms
                             )
                         ))
                         ->modalSubmitAction(false)
-                        ->modalCancelActionLabel('Tutup')
+                        ->modalCancelAction(false),
+                    Action::make('transaction')
+                        ->label('Histori Transaksi')
+                        ->icon('heroicon-o-credit-card')
+                        ->modalHeading('Histori Transaksi')
+                        ->modalWidth(MaxWidth::FitContent)
+                        ->modalContent(fn(Tagihan $record) => new HtmlString(
+                            Blade::render(
+                                '<div>
+                                    <livewire:table.transaction-list :tagihan="$tagihan" />
+                                </div>',
+                                ['tagihan' => $record]
+                            )
+                        ))
+                        ->modalSubmitAction(false)
+                        ->modalCancelAction(false)
                 ])
             ]);
     }

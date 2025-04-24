@@ -89,6 +89,11 @@ class Pelanggan extends Model
 
     public function getFilamentAvatarUrl(): ?string
     {
+        if ($this->foto && Storage::disk('public')->exists($this->foto)) {
+            return Storage::url($this->foto); // Balikin URL foto-nya
+        }
+
+        // Fallback ke avatar default
         return $this->getDefaultAvatar();
     }
 

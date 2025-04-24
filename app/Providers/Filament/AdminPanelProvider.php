@@ -77,7 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseTransactions()
             ->authGuard('admin')
             ->plugins([
-                FilamentLoggerPlugin::make(),
+                // FilamentLoggerPlugin::make(),
             ]);
     }
 }

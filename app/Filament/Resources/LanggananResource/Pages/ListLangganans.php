@@ -5,14 +5,18 @@ namespace App\Filament\Resources\LanggananResource\Pages;
 use App\Enums\InvoiceStatus;
 use App\Enums\SubscriptionStatus;
 use App\Filament\Resources\LanggananResource;
+use App\Filament\Resources\LanggananResource\Widgets\LanggananChartWidget;
 use App\Models\Langganan;
 use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Components\Tab;
 use Filament\Resources\Pages\ListRecords;
 
 class ListLangganans extends ListRecords
 {
+    use ExposesTableToWidgets;
+
     protected static string $resource = LanggananResource::class;
 
     protected function getHeaderActions(): array
@@ -67,4 +71,12 @@ class ListLangganans extends ListRecords
                 ->modifyQueryUsing(fn($query) => $query->whereHas('tagihan', fn($q) => $q->where('status', InvoiceStatus::BELUM_LUNAS))),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            LanggananChartWidget::class
+        ];
+    }
+
 }

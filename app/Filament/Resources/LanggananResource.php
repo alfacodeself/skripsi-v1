@@ -325,7 +325,7 @@ class LanggananResource extends Resource
                             Select::make('status')
                                 ->required()
                                 ->placeholder('Pilih Status')
-                                ->options(SubscriptionStatus::AKTIF),
+                                ->options(SubscriptionStatus::class),
                             RichEditor::make('catatan')->placeholder('Tulis catatan anda untuk langganan jika diperlukan...')
                         ])
                         ->action(function (array $data, Langganan $record) {
