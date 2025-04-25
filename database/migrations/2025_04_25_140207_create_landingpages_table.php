@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kategori_pengaduan', function (Blueprint $table) {
+        Schema::create('landingpage', function (Blueprint $table) {
             $table->id();
-            $table->string('kategori');
-            $table->enum('status', ["aktif", "tidak aktif"]);
+            $table->string('navigasi');
+            $table->string('icon_navigasi');
+            $table->string('kode_navigasi')->unique();
+            $table->longText('content');
+            $table->integer('order')->index();
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kategori_pengaduan');
+        Schema::dropIfExists('landingpage');
     }
 };

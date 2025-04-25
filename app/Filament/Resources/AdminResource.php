@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
@@ -67,8 +68,8 @@ class AdminResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('foto')
-                    ->searchable(),
+                ImageColumn::make('foto')
+                    ->circular(),
                 Tables\Columns\TextColumn::make('nama')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
@@ -77,6 +78,7 @@ class AdminResource extends Resource
                     ->boolean(),
                 Tables\Columns\TextColumn::make('status'),
                 Tables\Columns\TextColumn::make('tanggal_verifikasi_email')
+                    ->label('Verifikasi Pada')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

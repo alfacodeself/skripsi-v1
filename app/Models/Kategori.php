@@ -49,6 +49,6 @@ class Kategori extends Model
 
     public function paket(): HasMany
     {
-        return $this->hasMany(Paket::class);
+        return $this->hasMany(Paket::class, 'id_kategori');
     }
 }
